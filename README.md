@@ -10,7 +10,7 @@ Kurumi tells you your name.
 Kurumi can assign you roles that are whitelisted.
 ### **🎱 Random Number Generator (!rand {maximum_value})**
 Kurumi rolls a dice to give you a number based on a maximum number given. 0 cannot be rolled.
-**🤫**
+### **🤫**
 
 ## **Passive Features:**
 
