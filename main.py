@@ -12,19 +12,25 @@ token = os.getenv("DISCORD_TOKEN")
 
 #constants
 kisu_id = 595224459783307264
-WHITELIST_ROLES = ["Where Winds Meet", "Valorant", "Roblox", "Minecraft"] #self-assignable roles
+channelid = 1450430943226761318 #status channel id
+WHITELIST_ROLES = ["Where Winds Meet", "Valorant", "Roblox", "Minecraft"] #self assignable roles
 
+#intents
 handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
 intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
 
+#prefix
 bot = commands.Bot(command_prefix='!', intents=intents)
 
-#online message (terminal)
+#online message (terminal), set playing status, announces online status in chat
 @bot.event
 async def on_ready():
-    print(f'Coming online, {bot.user.name}!')
+    # channel = bot.get_channel(channelid)
+    print(f'{bot.user.name} is online!')
+    await bot.change_presence(activity=discord.Game(name="With Kisu"))
+    # await channel.send('Kurumi bot is now online!')
 
 #welcome message (to new members)
 @bot.event
@@ -36,16 +42,16 @@ async def on_member_join(member):
 #love you too message (from kisuhypee only)
 @bot.event
 async def on_message(message):
-    # Ignore the bot itself
+    #ignore messages from itself
     if message.author == bot.user:
         return
 
-    # Always let command messages be processed by commands framework regardless of author
+    #always let command messages be processed by commands framework regardless of author
     if isinstance(message.content, str) and message.content.startswith(bot.command_prefix):
         await bot.process_commands(message)
         return
 
-    # For non-command messages, enforce the kisuhypee-only filter
+    #for non-command messages, enforce the kisuhypee-only filter
     try:
         target_id = int(kisu_id)
     except Exception:
