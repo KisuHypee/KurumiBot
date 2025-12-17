@@ -12,6 +12,7 @@ token = os.getenv("DISCORD_TOKEN")
 
 #constants
 kisu_id = 595224459783307264
+alex_id = 378785762537242625
 channelid = 1450430943226761318 #status channel id
 WHITELIST_ROLES = ["Where Winds Meet", "Valorant", "Roblox", "Minecraft"] #self assignable roles
 
@@ -71,6 +72,39 @@ async def on_message(message):
             await message.channel.send("❤️ Love you too")
         else:
             await message.channel.send("💔 Love who?")
+
+#cookie itchy
+@bot.event
+async def on_message(message):
+    #ignore messages from itself
+    if message.author == bot.user:
+        return
+
+    #always let command messages be processed by commands framework regardless of author
+    if isinstance(message.content, str) and message.content.startswith(bot.command_prefix):
+        await bot.process_commands(message)
+        return
+
+    #for non-command messages, enforce the kisuhypee-only filter
+    try:
+        target_id = int(alex_id)
+    except Exception:
+        target_id = 0
+
+    if target_id:
+        if message.author.id != target_id:
+            return
+    else:
+        author_name = getattr(message.author, "name", "") or getattr(message.author, "display_name", "")
+        if author_name.lower() != "vocalfreak":
+            return
+
+    # Handle the "cookieitchy" behavior for the allowed user
+    if "cookie" in message.content.lower():
+        if "itchy" in message.content.lower():
+            await message.channel.send("🍪 Cookie itchy")
+        else:
+            await message.channel.send("⚡ I am the omnipresent god Raiden Shogun")
 
 #what's my name command
 @bot.command()
