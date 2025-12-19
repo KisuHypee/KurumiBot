@@ -16,7 +16,9 @@ Kurumi rolls a dice to give you a number based on a maximum number given. 0 cann
 
 ### **👋 Welcome messages**
 Kurumi welcomes new members that enter the server.
-### **❤️ Love you too messages (Only for Kisu)**
-Kurumi responds to Kisu's love. She also gets jealous.
+### **❤️ Personalised messages**
+Kurumi responds to Kisu's love. She also gets jealous. (...and more!)
 
 _**The project is not open as of now. Whether I'll publish it or not is still yet to be decided.**_
+
+upcoming features: random Kurumi image command
