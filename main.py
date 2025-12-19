@@ -12,19 +12,28 @@ token = os.getenv("DISCORD_TOKEN")
 
 #constants
 kisu_id = 595224459783307264
-WHITELIST_ROLES = ["Where Winds Meet", "Valorant", "Roblox", "Minecraft"] #self-assignable roles
+alex_id = 378785762537242625
+bcjy_id = 569913196601671681
+daniel_id = 1039195447895539763
+channelid = 1450430943226761318 #status channel id
+WHITELIST_ROLES = ["Where Winds Meet", "Valorant", "Roblox", "Minecraft"] #self assignable roles
 
+#intents
 handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
 intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
 
+#prefix
 bot = commands.Bot(command_prefix='!', intents=intents)
 
-#online message (terminal)
+#online message (terminal), set playing status, announces online status in chat
 @bot.event
 async def on_ready():
-    print(f'Coming online, {bot.user.name}!')
+    # channel = bot.get_channel(channelid)
+    print(f'{bot.user.name} is online!')
+    await bot.change_presence(activity=discord.Game(name="With Kisu"))
+    # await channel.send('Kurumi bot is now online!')
 
 #welcome message (to new members)
 @bot.event
@@ -33,38 +42,70 @@ async def on_member_join(member):
     if channel:
         await channel.send(f'Welcome to the server, {member.mention}! Make yourself at home.')
 
-#love you too message (from kisuhypee only)
+#combined message handlers
 @bot.event
 async def on_message(message):
-    # Ignore the bot itself
+    #ignore messages from itself
     if message.author == bot.user:
         return
 
-    # Always let command messages be processed by commands framework regardless of author
+    #always let command messages be processed by commands framework regardless of author
     if isinstance(message.content, str) and message.content.startswith(bot.command_prefix):
         await bot.process_commands(message)
         return
 
-    # For non-command messages, enforce the kisuhypee-only filter
+    content_lower = message.content.lower()
+
+    #love you too message (from kisuhypee only)
     try:
         target_id = int(kisu_id)
     except Exception:
         target_id = 0
-
     if target_id:
-        if message.author.id != target_id:
-            return
+        is_kisu = message.author.id == target_id
     else:
         author_name = getattr(message.author, "name", "") or getattr(message.author, "display_name", "")
-        if author_name.lower() != "kisuhypee":
-            return
-
-    # Handle the "love" behavior for the allowed user
-    if "love" in message.content.lower():
-        if "kurumi" in message.content.lower():
+        is_kisu = author_name.lower() == "kisuhypee"
+    if is_kisu and "love" in content_lower:
+        if "kurumi" in content_lower:
             await message.channel.send("❤️ Love you too")
         else:
             await message.channel.send("💔 Love who?")
+        return
+
+    #cookie itchy (from alex only)
+    try:
+        target_id = int(alex_id)
+    except Exception:
+        target_id = 0
+    if target_id:
+        is_alex = message.author.id == target_id
+    else:
+        author_name = getattr(message.author, "name", "") or getattr(message.author, "display_name", "")
+        is_alex = author_name.lower() == "vocalfreak"
+    if is_alex and "cookie" in content_lower:
+        if "itchy" in content_lower:
+            await message.channel.send("🍪 Cookie itchy")
+        else:
+            await message.channel.send("⚡ I am the omnipresent god Raiden Shogun")
+        return
+
+    #plump plushie (from bcjy only)
+    try:
+        target_id = int(bcjy_id)
+    except Exception:
+        target_id = 0
+    if target_id:
+        is_bcjy = message.author.id == target_id
+    else:
+        author_name = getattr(message.author, "name", "") or getattr(message.author, "display_name", "")
+        is_bcjy = author_name.lower() == "bcjy"
+    if is_bcjy and "plump" in content_lower:
+        if "plushie" in content_lower:
+            await message.channel.send("🟢 Plump ahh plushie")
+        else:
+            await message.channel.send("🔥🪰")
+        return
 
 #what's my name command
 @bot.command()
