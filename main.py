@@ -6,10 +6,16 @@ from dotenv import load_dotenv
 import os
 import random
 import asyncio
+import requests
 
 #load token from .env file
 load_dotenv()
 token = os.getenv("DISCORD_TOKEN")
+github_username = os.getenv("GITHUB_USERNAME")
+github_repo = os.getenv("GITHUB_REPO")
+github_img_path = os.getenv("GITHUB_IMG_PATH")
+api_url = os.getenv("API_URL")
+raw_url_base = os.getenv("RAW_URL_BASE")
 
 #constants
 kisu_id = 595224459783307264
@@ -217,6 +223,23 @@ async def funni(ctx, member: discord.Member = None, times: int = 10):
     for _ in range(times):
         await ctx.send(member.mention)
         await asyncio.sleep(0.2)
+
+#random image command
+@bot.command()
+async def randkurumi(ctx):
+    try:
+        response = requests.get(api_url)
+        response.raise_for_status()
+        data = response.json()
+        image_files = [item for item in data if item['name'].lower().endswith(('.png', '.jpg', '.jpeg', '.gif'))]
+        if not image_files:
+            return await ctx.send("No images found.")
+        selected_image = random.choice(image_files)
+        image_url = raw_url_base + selected_image['name']
+        await ctx.send(image_url)
+    except Exception as e:
+        logging.exception('Failed to fetch random Kurumi image')
+        await ctx.send("Failed to fetch image.")
 
 #run the bot
 bot.run(token, log_handler=handler, log_level=logging.DEBUG)
