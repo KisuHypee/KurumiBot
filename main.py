@@ -226,20 +226,28 @@ async def funni(ctx, member: discord.Member = None, times: int = 10):
 
 #random image command
 @bot.command()
-async def randkurumi(ctx):
+async def randomimage(ctx):
+    """Fetch a random image from the GitHub repository."""
     try:
+        # Get the list of images from the API
         response = requests.get(api_url)
         response.raise_for_status()
-        data = response.json()
-        image_files = [item for item in data if item['name'].lower().endswith(('.png', '.jpg', '.jpeg', '.gif'))]
-        if not image_files:
+        images = response.json()
+
+        if not images:
             return await ctx.send("No images found.")
-        selected_image = random.choice(image_files)
-        image_url = raw_url_base + selected_image['name']
+
+        # Select a random image
+        image_info = random.choice(images)
+        image_name = image_info['name']
+        image_url = f"{raw_url_base}/{github_username}/{github_repo}/main/{github_img_path}/{image_name}"
+
+        # Send the image URL in the chat
         await ctx.send(image_url)
+
     except Exception as e:
-        logging.exception('Failed to fetch random Kurumi image')
-        await ctx.send("Failed to fetch image.")
+        logging.exception('Failed to fetch random image')
+        await ctx.send("Failed to fetch a random image.")
 
 #run the bot
 bot.run(token, log_handler=handler, log_level=logging.DEBUG)
