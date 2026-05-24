@@ -28,6 +28,57 @@ intents.members = True
 #prefix
 bot = commands.Bot(command_prefix='!', intents=intents)
 
+#terminal input handler to send messages to discord
+async def terminal_input_handler():
+    """Handles terminal input to send messages to Discord channels"""
+    loop = asyncio.get_event_loop()
+    
+    while True:
+        try:
+            # Read channel ID and message from terminal
+            channel_id_str = await loop.run_in_executor(None, input, "\n📝 Enter channel ID (or 'quit' to exit): ")
+            
+            if channel_id_str.lower() == 'quit':
+                print("❌ Terminal input handler paused. Use !startinput to restart.")
+                bot._input_handler_running = False
+                break
+            
+            try:
+                channel_id = int(channel_id_str)
+            except ValueError:
+                print("⚠️ Invalid channel ID. Please enter a valid number.")
+                continue
+            
+            # Get the message content
+            message_content = await loop.run_in_executor(None, input, "💬 Enter message: ")
+            
+            if not message_content.strip():
+                print("⚠️ Message cannot be empty.")
+                continue
+            
+            # Get the channel and send the message
+            channel = bot.get_channel(channel_id)
+            if channel is None:
+                print(f"❌ Channel with ID {channel_id} not found.")
+                continue
+            
+            try:
+                await channel.send(message_content)
+                print(f"✅ Message sent to channel {channel_id}!")
+            except discord.Forbidden:
+                print(f"❌ Permission denied. I don't have permission to send messages in that channel.")
+            except Exception as e:
+                print(f"❌ Error sending message: {e}")
+                
+        except EOFError:
+            # This happens when input is closed
+            print("Input stream closed. Exiting terminal input handler.")
+            bot._input_handler_running = False
+            break
+        except Exception as e:
+            print(f"❌ Error in terminal input handler: {e}")
+            await asyncio.sleep(1)
+
 #online message (terminal), set playing status, announces online status in chat
 @bot.event
 async def on_ready():
@@ -35,6 +86,12 @@ async def on_ready():
     print(f'{bot.user.name} is online!')
     await bot.change_presence(activity=discord.Game(name="With Kisu"))
     # await channel.send('Kurumi bot is now online!')
+    
+    # Start the terminal input handler as a background task (only once)
+    if not hasattr(bot, '_input_handler_started'):
+        bot._input_handler_started = True
+        bot._input_handler_running = True
+        bot.loop.create_task(terminal_input_handler())
 
 #welcome message (to new members)
 @bot.event
@@ -217,6 +274,17 @@ async def funni(ctx, member: discord.Member = None, times: int = 10):
     for _ in range(times):
         await ctx.send(member.mention)
         await asyncio.sleep(0.2)
+
+#start terminal input handler command
+@bot.command()
+async def startinput(ctx):
+    """Start the terminal input handler to send messages via terminal"""
+    if getattr(bot, '_input_handler_running', False):
+        return await ctx.send("⚠️ Terminal input handler is already running!")
+    
+    bot._input_handler_running = True
+    bot.loop.create_task(terminal_input_handler())
+    await ctx.send("✅ Terminal input handler started!")
 
 #run the bot
 bot.run(token, log_handler=handler, log_level=logging.DEBUG)
